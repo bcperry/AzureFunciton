@@ -1,4 +1,5 @@
 # https://medium.com/mlearning-ai/etl-pipelines-with-python-azure-functions-6c3f7a7e35b1
+# https://learn.microsoft.com/en-us/azure/azure-functions/functions-bindings-storage-blob-trigger?tabs=python-v2%2Cisolated-process%2Cnodejs-v4&pivots=programming-language-python#metadata
 import azure.functions as func
 import logging
 import os
