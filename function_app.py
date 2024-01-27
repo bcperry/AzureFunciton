@@ -2,27 +2,28 @@
 # https://learn.microsoft.com/en-us/azure/azure-functions/functions-bindings-storage-blob-trigger?tabs=python-v2%2Cisolated-process%2Cnodejs-v4&pivots=programming-language-python#metadata
 import azure.functions as func
 import logging
-import os
-from io import BytesIO
-import pandas as pd
-import time
-from utilities import preprocess, save_dataframe_to_blob
+from data_processing import process_example
 
 app = func.FunctionApp()
 
-@app.blob_trigger(arg_name="myblob", path="webdev",
+# create the trigger on bronze ingest
+@app.blob_trigger(arg_name="myblob", path="bronze",
                                connection="AzureWebJobsStorage") 
-def blob_trigger(myblob: func.InputStream):
-    # Converting the csv file to dataframe 
-    df = pd.read_csv(BytesIO(myblob.read()))
-    logging.info(f"Shape: {df.shape}")
+def bronze_blob_trigger(myblob: func.InputStream):
 
-    # Preprocessing the data
-    df = preprocess(df)
+    # log information about this trigger
+    logging.info(f'filename: {myblob.name}')
+    if 'test_type' in myblob.metadata.keys():
+        logging.info('Test_type is: ' + myblob.metadata['test_type'])
 
-    # Preparing the file name
-    blob_name = myblob.name.split("/")[-1].split(".")[0]
-    file_name = f"{blob_name}_{int(time.time())}_preprocessed.csv"
+        # as an example, we will call the function to transform the data
+        # there will be many of these functions required
+        if myblob.metadata['test_type'] == 'example':
+            process_example(myblob)
 
-    # Saves the data to Azure blob storage
-    save_dataframe_to_blob(df, os.environ.get("AzureWebJobsStorage"), "dataengineering", file_name)
+    # if the appropriate metadata is not attached to the data, we cannot performa any ETL
+    else:
+        logging.info('Test_type Metadata not appended')
+    logging.info(myblob.metadata)
+
+

@@ -4,4 +4,10 @@
 
 azure-functions
 azure-storage-blob
+
+
+# for the upload utility
+azure-storage-blob 
+azure-identity
 pandas
+matplotlib
